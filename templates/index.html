@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TikTok Downloader</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<main class="card">
+  <div class="logo">♪</div>
+  <h1>TikTok Downloader</h1>
+  <p class="sub">Download video atau audio dari URL TikTok.</p>
+
+  <input id="url" type="url" placeholder="Tempel link TikTok di sini..." autocomplete="off">
+
+  <div class="buttons">
+    <button onclick="downloadFile('video')">🎬 Video</button>
+    <button class="secondary" onclick="downloadFile('audio')">🎵 Audio MP3</button>
+  </div>
+
+  <div id="status"></div>
+  <p class="note">Gunakan hanya untuk konten yang kamu punya hak untuk mengunduh.</p>
+</main>
+
+<script>
+async function downloadFile(kind) {
+  const url = document.getElementById('url').value.trim();
+  const status = document.getElementById('status');
+  if (!url) {
+    status.textContent = 'Tempel URL TikTok dulu.';
+    return;
+  }
+  status.textContent = '⏳ Lagi memproses...';
+  try {
+    const res = await fetch('/download', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({url, kind})
+    });
+    if (!res.ok) {
+      const j = await res.json().catch(()=>({}));
+      throw new Error(j.error || 'Download gagal.');
+    }
+    const blob = await res.blob();
+    const cd = res.headers.get('Content-Disposition') || '';
+    const m = cd.match(/filename="?([^"]+)"?/i);
+    const filename = m ? m[1] : (kind === 'audio' ? 'tiktok.mp3' : 'tiktok.mp4');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    status.textContent = '✅ Selesai. Cek folder Download kamu.';
+  } catch (e) {
+    status.textContent = '❌ ' + e.message;
+  }
+}
+</script>
+</body>
+</html>
