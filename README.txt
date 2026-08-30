@@ -1,4 +1,4 @@
-TIKTOK DOWNLOADER - CARA JALAN DI HP
+TOKTOK DOWNLOADER - CARA JALAN DI HP
 
 1. Install Python dan FFmpeg di Termux.
 2. Masuk ke folder project.
